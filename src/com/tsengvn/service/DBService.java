@@ -23,8 +23,8 @@ public class DBService {
 	private final static String CLOSED_DATE = "closed_date";
 	private final static String MATURITY = "maturity";
 	private final static String AUTO_RENEW = "auto_renew";
-	private final static String AUTO_TRANSFER = "auto_tranfer";
-	
+	private final static String TRANSFER_ACCOUNT = "transfer_account";
+	private final static String ACCOUNT_TYPE = "account_type";
 	private static DBService instance = null;
 	
 	private Connection mCon;
@@ -54,7 +54,8 @@ public class DBService {
 						CLOSED_DATE 	+ " date," +
 						MATURITY 		+ " date," +
 						AUTO_RENEW 		+ " boolean," +
-						AUTO_TRANSFER 	+ " varchar(20)" +
+						TRANSFER_ACCOUNT 	+ " varchar(20)," +
+						ACCOUNT_TYPE 	+ " varchar(3)" +
 						")";
 				mCon.createStatement().execute(createTable);
 				System.out.print("Create database for first run ok !");
@@ -62,14 +63,22 @@ public class DBService {
 				System.out.print("Database exist, no need to create.");
 			}
 			
-			
+			closeConnetion();
 		}catch (SQLException e){
 			System.err.print("Error : " + e.getMessage());
 		}
 		
 	}
 	
+	public void addNewAccount(){
+		
+	}
+	
 	public void openConnection() throws SQLException{
 		mCon = DriverManager.getConnection(DATABASE_URL, "sa", "");
+	}
+	
+	public void closeConnetion() throws SQLException{
+		mCon.close();
 	}
 }

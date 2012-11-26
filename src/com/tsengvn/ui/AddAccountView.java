@@ -1,42 +1,51 @@
 package com.tsengvn.ui;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Calendar;
 
 import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.event.ListDataListener;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.tsengvn.service.AccountModel;
+import com.toedter.calendar.JDateChooser;
 
 /**
  * Creator: Hien Ngo
  * Date: Nov 20, 2012
  */
-public class AddAccountView extends JDialog {
+public class AddAccountView extends JPanel implements ActionListener{
 	private JTextField tfAccNo;
 	private JTextField tfCusNo;
 	private JTextField tfCusName;
 	private JTextField tfRate;
-	private JTextField tfOpeningDate;
-	private JTextField tfClosedDate;
 	private JTextField tfBookedBalance;
 	private JTextField tfMaturity;
-	private JLabel lblCustomerName;
-	private JLabel lblRate;
-	private JLabel lblOpeningDate;
-	private JLabel lblClosedDate;
-	private JLabel lblBookedBalance;
-	private JLabel lblMaturity;
 	private JTextField tfAutoTransfer;
+	private JButton btnAdd;
+	private JButton btnClear;
+	private JCheckBox chbAutoRenew;
+	private JComboBox cbbAccountType;
+	private JDateChooser dchOpeningDate;
+	private JDateChooser dchClosedDate;
 
 
 	/**
 	 * Create the frame.
 	 */
 	public AddAccountView() {
-		setBounds(100, 100, 591, 300);
+		setBounds(100, 100, 586, 297);
 		setLayout(null);
 		
 		JLabel lblAccountNo = new JLabel("Account No");
@@ -67,16 +76,6 @@ public class AddAccountView extends JDialog {
 		add(tfRate);
 		tfRate.setColumns(10);
 		
-		tfOpeningDate = new JTextField();
-		tfOpeningDate.setBounds(133, 96, 134, 28);
-		add(tfOpeningDate);
-		tfOpeningDate.setColumns(10);
-		
-		tfClosedDate = new JTextField();
-		tfClosedDate.setBounds(406, 96, 134, 28);
-		add(tfClosedDate);
-		tfClosedDate.setColumns(10);
-		
 		tfBookedBalance = new JTextField();
 		tfBookedBalance.setBounds(133, 136, 134, 28);
 		add(tfBookedBalance);
@@ -87,31 +86,31 @@ public class AddAccountView extends JDialog {
 		add(tfMaturity);
 		tfMaturity.setColumns(10);
 		
-		lblCustomerName = new JLabel("Customer Name");
+		JLabel lblCustomerName = new JLabel("Customer Name");
 		lblCustomerName.setBounds(6, 62, 115, 16);
 		add(lblCustomerName);
 		
-		lblRate = new JLabel("Rate");
+		JLabel lblRate = new JLabel("Rate");
 		lblRate.setBounds(406, 62, 61, 16);
 		add(lblRate);
 		
-		lblOpeningDate = new JLabel("Opening Date");
+		JLabel lblOpeningDate = new JLabel("Opening Date");
 		lblOpeningDate.setBounds(6, 102, 91, 16);
 		add(lblOpeningDate);
 		
-		lblClosedDate = new JLabel("Closed Date");
+		JLabel lblClosedDate = new JLabel("Closed Date");
 		lblClosedDate.setBounds(303, 102, 91, 16);
 		add(lblClosedDate);
 		
-		lblBookedBalance = new JLabel("Booked Balance");
+		JLabel lblBookedBalance = new JLabel("Booked Balance");
 		lblBookedBalance.setBounds(6, 142, 103, 16);
 		add(lblBookedBalance);
 		
-		lblMaturity = new JLabel("Maturity");
+		JLabel lblMaturity = new JLabel("Maturity");
 		lblMaturity.setBounds(303, 142, 61, 16);
 		add(lblMaturity);
 		
-		JCheckBox chbAutoRenew = new JCheckBox("Auto Renew");
+		chbAutoRenew = new JCheckBox("Auto Renew");
 		chbAutoRenew.setBounds(303, 178, 128, 23);
 		add(chbAutoRenew);
 		
@@ -120,17 +119,112 @@ public class AddAccountView extends JDialog {
 		add(tfAutoTransfer);
 		tfAutoTransfer.setColumns(10);
 		
-		JLabel lblAutoTransfer = new JLabel("Auto Transfer");
-		lblAutoTransfer.setBounds(6, 182, 91, 16);
+		JLabel lblAutoTransfer = new JLabel("Transfer Account");
+		lblAutoTransfer.setBounds(6, 182, 115, 16);
 		add(lblAutoTransfer);
 		
-		JButton btnAdd = new JButton("Add");
-		btnAdd.setBounds(162, 239, 117, 29);
+		btnAdd = new JButton("Add");
+		btnAdd.setBounds(155, 252, 117, 29);
 		add(btnAdd);
 		
-		JButton btnClear = new JButton("Clear");
-		btnClear.setBounds(303, 239, 117, 29);
+		btnClear = new JButton("Clear");
+		btnClear.setBounds(303, 252, 117, 29);
 		add(btnClear);
-
+		
+		btnAdd.addActionListener(this);
+		btnClear.addActionListener(this);
+		
+		cbbAccountType = new JComboBox(AccountModel.model.values());
+		cbbAccountType.setBounds(281, 213, 83, 27);
+		add(cbbAccountType);
+		
+		JLabel lblAccountType = new JLabel("Account Type");
+		lblAccountType.setBounds(179, 216, 88, 16);
+		add(lblAccountType);
+		
+		dchOpeningDate = new JDateChooser();
+		dchOpeningDate.getCalendarButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
+		dchOpeningDate.setBounds(133, 96, 134, 28);
+		add(dchOpeningDate);
+		
+		dchClosedDate = new JDateChooser();
+		dchClosedDate.setBounds(406, 96, 134, 28);
+		add(dchClosedDate);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == btnAdd){
+			doAddNewAccount();
+		} else if (e.getSource() == btnClear){
+			tfAccNo.setText("");
+			tfAutoTransfer.setText("");
+			tfBookedBalance.setText("");
+			tfCusName.setText("");
+			tfCusNo.setText("");
+			tfMaturity.setText("");
+			tfRate.setText("");
+			dchOpeningDate.setDate(Calendar.getInstance().getTime());
+		}
+		
+	}
+	
+	private void doAddNewAccount(){
+		if (StringUtils.isEmpty(tfAccNo.getText()) || StringUtils.isEmpty(tfCusNo.getText())){
+			showError("Account Number and Customer number are required!");
+			return;
+		}
+		AccountModel addModel = new AccountModel(tfAccNo.getText(), tfCusNo.getText());
+		
+		try {
+			addModel.setBookedBalance(Long.parseLong(tfBookedBalance.getText()));
+		} catch (Exception e) {
+			showError("Invalid Booked Balance value!");
+			return;
+		}
+		
+		if (dchClosedDate.getDate() == null){
+			showError("Invalid Closed Date value!");
+			return;
+		} else {
+			addModel.setCloseDate(dchClosedDate.getDate().getTime());
+		}
+		
+		if (dchOpeningDate.getDate() == null){
+			showError("Invalid Opening Date value!");
+			return;
+		} else {
+			addModel.setOpenDate(dchOpeningDate.getDate().getTime());
+		}
+		
+		if (StringUtils.isEmpty(tfCusName.getText())){
+			showError("Invalid Customer Name value!");
+			return;
+		}
+			
+		try {
+			addModel.setMaturity(Long.parseLong(tfMaturity.getText()));
+		} catch (Exception e) {
+			showError("Invalid Maturity value!");
+			return;
+		}
+		
+		try {
+			addModel.setRate(Float.parseFloat(tfRate.getText()));
+		} catch (Exception e) {
+			showError("Invalid Opening Date value!");
+			return;
+		}
+		
+	}
+	
+	private void showError(String message){
+		JOptionPane.showMessageDialog(this,
+			    message,
+			    "Invalid",
+			    JOptionPane.WARNING_MESSAGE);
 	}
 }

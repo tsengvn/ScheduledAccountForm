@@ -1,4 +1,7 @@
 package com.tsengvn.service;
+
+import javax.swing.ComboBoxModel;
+
 /**
  * Creator: Hien Ngo
  * Date: Nov 20, 2012
@@ -7,6 +10,7 @@ public class AccountModel {
 	private String accNo;
 	private String cusNo;
 	private String cusName;
+	private String accType;
 	private float rate;
 	private long openDate;
 	private long bookedBalance;
@@ -14,6 +18,10 @@ public class AccountModel {
 	private long maturity;
 	private boolean autoRenew;
 	private String autoTransfer;
+	
+	public static enum model {
+		USD, VND
+	}
 	
 	public AccountModel(String aAccNo, String aCusNo){
 		accNo = aAccNo;
@@ -79,6 +87,14 @@ public class AccountModel {
 	}
 	public void setAutoTransfer(String autoTransfer) {
 		this.autoTransfer = autoTransfer;
+	}
+
+	public String getAccType() {
+		return accType;
+	}
+
+	public void setAccType(String accType) {
+		this.accType = accType;
 	}
 	
 	
