@@ -49,10 +49,10 @@ public class DBService {
 						CUSTOMER_NO 	+ " varchar(20)," +
 						CUSTOMER_NAME 	+ " varchar(255)," +
 						RATE 			+ " float," +
-						OPENING_DATE 	+ " date," +
+						OPENING_DATE 	+ " BIGINT," +
 						BOOKED_BALANCE 	+ " float," +
-						CLOSED_DATE 	+ " date," +
-						MATURITY 		+ " date," +
+						CLOSED_DATE 	+ " BIGINT," +
+						MATURITY 		+ " BIGINT," +
 						AUTO_RENEW 		+ " boolean," +
 						TRANSFER_ACCOUNT 	+ " varchar(20)," +
 						ACCOUNT_TYPE 	+ " varchar(3)" +
@@ -65,12 +65,34 @@ public class DBService {
 			
 			closeConnetion();
 		}catch (SQLException e){
-			System.err.print("Error : " + e.getMessage());
+			System.err.println("Error : " + e.getMessage());
 		}
 		
 	}
 	
-	public void addNewAccount(){
+	public boolean addNewAccount(AccountModel aAccount){
+		try {
+			openConnection();
+			String insert = "insert into " + ACCOUNT_TABLE + " values(" + 
+					"'"+ aAccount.getAccNo() + "'," +
+					"'"+ aAccount.getCusNo() + "'," +
+					"'"+  aAccount.getCusName() + "'," +
+					aAccount.getRate() + "," +
+					aAccount.getOpenDate() +  "," +
+					aAccount.getBookedBalance() + "," +
+					aAccount.getCloseDate() + "," +
+					aAccount.getMaturity() + "," +
+					aAccount.isAutoRenew() + "," +
+					"'"+ aAccount.getAutoTransfer() + "'," +
+					"'"+ aAccount.getAccType() + "'" +
+					")";
+			System.out.println("Insert SQL : " + insert);
+			mCon.createStatement().execute(insert);
+			return true;
+		} catch (Exception e) {
+			System.err.println("Error : " + e.getMessage());
+			return false;
+		}
 		
 	}
 	

@@ -19,6 +19,7 @@ import javax.swing.event.ListDataListener;
 import org.apache.commons.lang3.StringUtils;
 
 import com.tsengvn.service.AccountModel;
+import com.tsengvn.service.DBService;
 import com.toedter.calendar.JDateChooser;
 
 /**
@@ -31,7 +32,6 @@ public class AddAccountView extends JPanel implements ActionListener{
 	private JTextField tfCusName;
 	private JTextField tfRate;
 	private JTextField tfBookedBalance;
-	private JTextField tfMaturity;
 	private JTextField tfAutoTransfer;
 	private JButton btnAdd;
 	private JButton btnClear;
@@ -39,6 +39,7 @@ public class AddAccountView extends JPanel implements ActionListener{
 	private JComboBox cbbAccountType;
 	private JDateChooser dchOpeningDate;
 	private JDateChooser dchClosedDate;
+	private JDateChooser dchMaturity;
 
 
 	/**
@@ -80,11 +81,6 @@ public class AddAccountView extends JPanel implements ActionListener{
 		tfBookedBalance.setBounds(133, 136, 134, 28);
 		add(tfBookedBalance);
 		tfBookedBalance.setColumns(10);
-		
-		tfMaturity = new JTextField();
-		tfMaturity.setBounds(406, 136, 134, 28);
-		add(tfMaturity);
-		tfMaturity.setColumns(10);
 		
 		JLabel lblCustomerName = new JLabel("Customer Name");
 		lblCustomerName.setBounds(6, 62, 115, 16);
@@ -153,6 +149,10 @@ public class AddAccountView extends JPanel implements ActionListener{
 		dchClosedDate = new JDateChooser();
 		dchClosedDate.setBounds(406, 96, 134, 28);
 		add(dchClosedDate);
+		
+		dchMaturity = new JDateChooser();
+		dchMaturity.setBounds(406, 136, 134, 28);
+		add(dchMaturity);
 	}
 	
 	@Override
@@ -165,7 +165,6 @@ public class AddAccountView extends JPanel implements ActionListener{
 			tfBookedBalance.setText("");
 			tfCusName.setText("");
 			tfCusNo.setText("");
-			tfMaturity.setText("");
 			tfRate.setText("");
 			dchOpeningDate.setDate(Calendar.getInstance().getTime());
 		}
@@ -204,12 +203,9 @@ public class AddAccountView extends JPanel implements ActionListener{
 			showError("Invalid Customer Name value!");
 			return;
 		}
-			
-		try {
-			addModel.setMaturity(Long.parseLong(tfMaturity.getText()));
-		} catch (Exception e) {
-			showError("Invalid Maturity value!");
-			return;
+		
+		if (dchOpeningDate.getDate() != null){
+			addModel.setMaturity(dchMaturity.getDate().getTime());
 		}
 		
 		try {
@@ -218,6 +214,10 @@ public class AddAccountView extends JPanel implements ActionListener{
 			showError("Invalid Opening Date value!");
 			return;
 		}
+		
+		addModel.setAccType(AccountModel.model.values()[cbbAccountType.getSelectedIndex()].toString());
+		
+		DBService.getInstance().addNewAccount(addModel);
 		
 	}
 	
