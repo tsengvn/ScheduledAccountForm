@@ -28,7 +28,6 @@ import com.toedter.calendar.JDateChooser;
  */
 public class AddAccountView extends JPanel implements ActionListener{
 	private JTextField tfAccNo;
-	private JTextField tfCusNo;
 	private JTextField tfCusName;
 	private JTextField tfRate;
 	private JTextField tfBookedBalance;
@@ -39,7 +38,9 @@ public class AddAccountView extends JPanel implements ActionListener{
 	private JComboBox cbbAccountType;
 	private JDateChooser dchOpeningDate;
 	private JDateChooser dchClosedDate;
-	private JDateChooser dchMaturity;
+	private JLabel lblTerm;
+	private JTextField tfOutstanding;
+	private JTextField tfTerm;
 
 
 	/**
@@ -53,7 +54,7 @@ public class AddAccountView extends JPanel implements ActionListener{
 		lblAccountNo.setBounds(6, 28, 91, 16);
 		add(lblAccountNo);
 		
-		JLabel lblCustomerNo = new JLabel("Customer No");
+		JLabel lblCustomerNo = new JLabel("Customer Name");
 		lblCustomerNo.setBounds(303, 28, 91, 16);
 		add(lblCustomerNo);
 		
@@ -62,18 +63,13 @@ public class AddAccountView extends JPanel implements ActionListener{
 		add(tfAccNo);
 		tfAccNo.setColumns(10);
 		
-		tfCusNo = new JTextField();
-		tfCusNo.setBounds(406, 22, 134, 28);
-		add(tfCusNo);
-		tfCusNo.setColumns(10);
-		
 		tfCusName = new JTextField();
-		tfCusName.setBounds(133, 56, 217, 28);
+		tfCusName.setBounds(406, 22, 134, 28);
 		add(tfCusName);
 		tfCusName.setColumns(10);
 		
 		tfRate = new JTextField();
-		tfRate.setBounds(479, 56, 61, 28);
+		tfRate.setBounds(329, 55, 61, 28);
 		add(tfRate);
 		tfRate.setColumns(10);
 		
@@ -82,12 +78,8 @@ public class AddAccountView extends JPanel implements ActionListener{
 		add(tfBookedBalance);
 		tfBookedBalance.setColumns(10);
 		
-		JLabel lblCustomerName = new JLabel("Customer Name");
-		lblCustomerName.setBounds(6, 62, 115, 16);
-		add(lblCustomerName);
-		
 		JLabel lblRate = new JLabel("Rate");
-		lblRate.setBounds(406, 62, 61, 16);
+		lblRate.setBounds(280, 61, 39, 16);
 		add(lblRate);
 		
 		JLabel lblOpeningDate = new JLabel("Opening Date");
@@ -102,12 +94,8 @@ public class AddAccountView extends JPanel implements ActionListener{
 		lblBookedBalance.setBounds(6, 142, 103, 16);
 		add(lblBookedBalance);
 		
-		JLabel lblMaturity = new JLabel("Maturity");
-		lblMaturity.setBounds(303, 142, 61, 16);
-		add(lblMaturity);
-		
 		chbAutoRenew = new JCheckBox("Auto Renew");
-		chbAutoRenew.setBounds(303, 178, 128, 23);
+		chbAutoRenew.setBounds(303, 179, 128, 23);
 		add(chbAutoRenew);
 		
 		tfAutoTransfer = new JTextField();
@@ -120,22 +108,22 @@ public class AddAccountView extends JPanel implements ActionListener{
 		add(lblAutoTransfer);
 		
 		btnAdd = new JButton("Add");
-		btnAdd.setBounds(155, 252, 117, 29);
+		btnAdd.setBounds(150, 232, 117, 29);
 		add(btnAdd);
 		
 		btnClear = new JButton("Clear");
-		btnClear.setBounds(303, 252, 117, 29);
+		btnClear.setBounds(303, 232, 117, 29);
 		add(btnClear);
 		
 		btnAdd.addActionListener(this);
 		btnClear.addActionListener(this);
 		
 		cbbAccountType = new JComboBox(AccountModel.model.values());
-		cbbAccountType.setBounds(281, 213, 83, 27);
+		cbbAccountType.setBounds(133, 57, 83, 27);
 		add(cbbAccountType);
 		
 		JLabel lblAccountType = new JLabel("Account Type");
-		lblAccountType.setBounds(179, 216, 88, 16);
+		lblAccountType.setBounds(6, 62, 88, 16);
 		add(lblAccountType);
 		
 		dchOpeningDate = new JDateChooser();
@@ -150,9 +138,23 @@ public class AddAccountView extends JPanel implements ActionListener{
 		dchClosedDate.setBounds(406, 96, 134, 28);
 		add(dchClosedDate);
 		
-		dchMaturity = new JDateChooser();
-		dchMaturity.setBounds(406, 136, 134, 28);
-		add(dchMaturity);
+		JLabel lblOutstanding = new JLabel("Outstanding");
+		lblOutstanding.setBounds(303, 145, 61, 14);
+		add(lblOutstanding);
+		
+		tfOutstanding = new JTextField();
+		tfOutstanding.setBounds(406, 136, 134, 28);
+		add(tfOutstanding);
+		tfOutstanding.setColumns(10);
+		
+		lblTerm = new JLabel("Term");
+		lblTerm.setBounds(434, 61, 39, 14);
+		add(lblTerm);
+		
+		tfTerm = new JTextField();
+		tfTerm.setBounds(479, 55, 61, 28);
+		add(tfTerm);
+		tfTerm.setColumns(10);
 	}
 	
 	@Override
@@ -164,7 +166,6 @@ public class AddAccountView extends JPanel implements ActionListener{
 			tfAutoTransfer.setText("");
 			tfBookedBalance.setText("");
 			tfCusName.setText("");
-			tfCusNo.setText("");
 			tfRate.setText("");
 			dchOpeningDate.setDate(Calendar.getInstance().getTime());
 		}
@@ -172,16 +173,31 @@ public class AddAccountView extends JPanel implements ActionListener{
 	}
 	
 	private void doAddNewAccount(){
-		if (StringUtils.isEmpty(tfAccNo.getText()) || StringUtils.isEmpty(tfCusNo.getText())){
+		if (StringUtils.isEmpty(tfAccNo.getText()) || StringUtils.isEmpty(tfCusName.getText())){
 			showError("Account Number and Customer number are required!");
 			return;
 		}
-		AccountModel addModel = new AccountModel(tfAccNo.getText(), tfCusNo.getText());
+		AccountModel addModel = new AccountModel(tfAccNo.getText());
+		addModel.setCusName(tfCusName.getText());
 		
 		try {
 			addModel.setBookedBalance(Long.parseLong(tfBookedBalance.getText()));
 		} catch (Exception e) {
 			showError("Invalid Booked Balance value!");
+			return;
+		}
+		
+		try {
+			addModel.setBookedBalance(Long.parseLong(tfOutstanding.getText()));
+		} catch (Exception e) {
+			showError("Invalid Outstading value!");
+			return;
+		}
+		
+		try {
+			addModel.setTerm(Integer.parseInt(tfTerm.getText()));
+		} catch (Exception e) {
+			showError("Invalid Outstading value!");
 			return;
 		}
 		
@@ -199,14 +215,14 @@ public class AddAccountView extends JPanel implements ActionListener{
 			addModel.setOpenDate(dchOpeningDate.getDate().getTime());
 		}
 		
-		if (StringUtils.isEmpty(tfCusName.getText())){
-			showError("Invalid Customer Name value!");
-			return;
-		}
-		
-		if (dchOpeningDate.getDate() != null){
-			addModel.setMaturity(dchMaturity.getDate().getTime());
-		}
+//		if (StringUtils.isEmpty(tfCusName.getText())){
+//			showError("Invalid Customer Name value!");
+//			return;
+//		}
+//		
+//		if (dchOpeningDate.getDate() != null){
+//			addModel.setMaturity(dchMaturity.getDate().getTime());
+//		}
 		
 		try {
 			addModel.setRate(Float.parseFloat(tfRate.getText()));

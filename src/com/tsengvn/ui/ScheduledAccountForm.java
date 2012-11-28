@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -49,6 +51,7 @@ public class ScheduledAccountForm {
 				try {
 					ScheduledAccountForm window = new ScheduledAccountForm();
 					window.mFrame.setVisible(true);
+					
 //					AddAccountView addView = new AddAccountView();
 //					addView.setVisible(true);
 //					window.setMainView(new AddAccountView());
@@ -70,6 +73,8 @@ public class ScheduledAccountForm {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		DBService.getInstance().init();
+		
 		mFrame = new JFrame();
 		mFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mFrame.setBounds(100, 100, 600, 400);
@@ -97,8 +102,7 @@ public class ScheduledAccountForm {
 		
 		addView = new AddAccountView();
 		tabbedPane.addTab("Add new", null, addView, null);
-		
-	    DBService.getInstance().init();
+	    
 
 	}
 	

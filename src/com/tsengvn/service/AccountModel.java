@@ -8,24 +8,25 @@ import javax.swing.ComboBoxModel;
  */
 public class AccountModel {
 	private String accNo;
-	private String cusNo;
+//	private String cusNo;
 	private String cusName;
 	private String accType;
 	private float rate;
 	private long openDate;
 	private long bookedBalance;
 	private long closeDate;
-	private long maturity;
+//	private long maturity;
 	private boolean autoRenew;
 	private String autoTransfer;
+	private float outstanding;
+	private int term;
 	
 	public static enum model {
 		USD, VND
 	}
 	
-	public AccountModel(String aAccNo, String aCusNo){
+	public AccountModel(String aAccNo){
 		accNo = aAccNo;
-		cusName = aCusNo;
 	}
 	
 	public String getAccNo() {
@@ -34,12 +35,12 @@ public class AccountModel {
 	public void setAccNo(String accNo) {
 		this.accNo = accNo;
 	}
-	public String getCusNo() {
-		return cusNo;
-	}
-	public void setCusNo(String cusNo) {
-		this.cusNo = cusNo;
-	}
+//	public String getCusNo() {
+//		return cusNo;
+//	}
+//	public void setCusNo(String cusNo) {
+//		this.cusNo = cusNo;
+//	}
 	public String getCusName() {
 		return cusName;
 	}
@@ -70,12 +71,12 @@ public class AccountModel {
 	public void setCloseDate(long closeDate) {
 		this.closeDate = closeDate;
 	}
-	public long getMaturity() {
-		return maturity;
-	}
-	public void setMaturity(long maturity) {
-		this.maturity = maturity;
-	}
+//	public long getMaturity() {
+//		return maturity;
+//	}
+//	public void setMaturity(long maturity) {
+//		this.maturity = maturity;
+//	}
 	public boolean isAutoRenew() {
 		return autoRenew;
 	}
@@ -95,6 +96,22 @@ public class AccountModel {
 
 	public void setAccType(String accType) {
 		this.accType = accType;
+	}
+
+	public float getOutstanding() {
+		return outstanding;
+	}
+
+	public void setOutstanding(float outstanding) {
+		this.outstanding = outstanding;
+	}
+
+	public int getTerm() {
+		return term;
+	}
+
+	public void setTerm(int term) {
+		this.term = term;
 	}
 	
 	
