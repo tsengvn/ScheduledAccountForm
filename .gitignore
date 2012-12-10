@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 .settings/org.eclipse.jdt.core.prefs
 bin/*
 db/*
-=======
-.settings/org.eclipse.jdt.core.prefs
-bin/*
-db/*
->>>>>>> 4fd112cb76cad74b260a1c61fd2721996135a625
+
