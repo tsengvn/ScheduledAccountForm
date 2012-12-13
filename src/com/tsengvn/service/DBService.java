@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -118,8 +119,8 @@ public class DBService {
 				acc.add(rs.getString(CUSTOMER_NAME));
 				acc.add(rs.getFloat(RATE));
 				acc.add(rs.getFloat(BOOKED_BALANCE));
-				acc.add(rs.getLong(OPENING_DATE));
-				acc.add(rs.getLong(CLOSED_DATE));
+				acc.add(new Date(rs.getLong(OPENING_DATE)));
+				acc.add(new Date(rs.getLong(CLOSED_DATE)));
 				acc.add(rs.getInt(TERM));
 				acc.add(rs.getBoolean(AUTO_RENEW));
 				acc.add(rs.getString(TRANSFER_ACCOUNT));
