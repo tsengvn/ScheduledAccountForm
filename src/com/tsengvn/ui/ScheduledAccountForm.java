@@ -52,9 +52,6 @@ public class ScheduledAccountForm {
 					ScheduledAccountForm window = new ScheduledAccountForm();
 					window.mFrame.setVisible(true);
 					
-//					AddAccountView addView = new AddAccountView();
-//					addView.setVisible(true);
-//					window.setMainView(new AddAccountView());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -77,7 +74,7 @@ public class ScheduledAccountForm {
 		
 		mFrame = new JFrame();
 		mFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mFrame.setBounds(100, 100, 600, 400);
+		mFrame.setBounds(100, 100, 893, 575);
 		
 		mMenuBar = new JMenuBar();
 		mFrame.setJMenuBar(mMenuBar);
@@ -102,7 +99,17 @@ public class ScheduledAccountForm {
 		
 		addView = new AddAccountView();
 		tabbedPane.addTab("Add new", null, addView, null);
-	    
+		tabbedPane.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				JTabbedPane sourceTabbedPane = (JTabbedPane) arg0.getSource();
+		        if (sourceTabbedPane.getSelectedIndex() == 0){
+		        	
+		        }
+				
+			}
+		});
 
 	}
 	

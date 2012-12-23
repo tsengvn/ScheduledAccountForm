@@ -1,8 +1,15 @@
 package com.tsengvn.ui;
 
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.text.NumberFormat;
 import java.util.Calendar;
 
 import javax.swing.JDialog;
@@ -15,147 +22,181 @@ import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.event.ListDataListener;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.MaskFormatter;
+import javax.swing.text.NumberFormatter;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.tsengvn.service.AccountModel;
 import com.tsengvn.service.DBService;
+import com.tutego.jrtf.Rtf;
 import com.toedter.calendar.JDateChooser;
+import javax.swing.JFormattedTextField;
+import java.awt.BorderLayout;
 
 /**
  * Creator: Hien Ngo
  * Date: Nov 20, 2012
  */
 public class AddAccountView extends JPanel implements ActionListener{
-	private JTextField tfAccNo;
-	private JTextField tfCusName;
-	private JTextField tfRate;
-	private JTextField tfBookedBalance;
-	private JTextField tfAutoTransfer;
+	private JFormattedTextField tfAccNo;
+	private JFormattedTextField tfCusNumber;
+	private JFormattedTextField tfRate;
+	private JFormattedTextField tfBookedBalance;
+	private JFormattedTextField tfAutoTransfer;
 	private JButton btnAdd;
 	private JButton btnClear;
 	private JCheckBox chbAutoRenew;
 	private JComboBox cbbAccountType;
 	private JDateChooser dchOpeningDate;
-	private JDateChooser dchClosedDate;
+	private JDateChooser dchMaturity;
 	private JLabel lblTerm;
-	private JTextField tfOutstanding;
-	private JTextField tfTerm;
+	private JFormattedTextField tfOutstanding;
+	private JFormattedTextField tfTerm;
 
+	//Formats to format and parse numbers
+    private NumberFormat amountFormat;
+    private NumberFormat percentFormat;
+    private NumberFormat paymentFormat;
+    private JTextField tfCusName;
 
+    private AccountModel addModel;
+    private JPanel panel;
+    
+    private static final String NO_PATTERN = "#############";
+    
 	/**
 	 * Create the frame.
 	 */
 	public AddAccountView() {
-		setBounds(100, 100, 586, 297);
-		setLayout(null);
+		setBounds(100, 100, 742, 417);
+		setLayout(new BorderLayout(0, 0));
 		
-		JLabel lblAccountNo = new JLabel("Account No");
-		lblAccountNo.setBounds(6, 28, 91, 16);
-		add(lblAccountNo);
+		panel = new JPanel();
+		add(panel, BorderLayout.CENTER);
+		panel.setLayout(null);
 		
-		JLabel lblCustomerNo = new JLabel("Customer Name");
-		lblCustomerNo.setBounds(303, 28, 91, 16);
-		add(lblCustomerNo);
+		JLabel lblAccountNo = new JLabel("Account Number");
+		lblAccountNo.setBounds(99, 58, 117, 16);
+		panel.add(lblAccountNo);
 		
-		tfAccNo = new JTextField();
-		tfAccNo.setBounds(133, 22, 134, 28);
-		add(tfAccNo);
-		tfAccNo.setColumns(10);
+		JLabel lblCustomerNo = new JLabel("Customer Number");
+		lblCustomerNo.setBounds(398, 93, 113, 16);
+		panel.add(lblCustomerNo);
 		
-		tfCusName = new JTextField();
-		tfCusName.setBounds(406, 22, 134, 28);
-		add(tfCusName);
-		tfCusName.setColumns(10);
+		tfAccNo = new JFormattedTextField(createFormatter(NO_PATTERN));
+		tfAccNo.setBounds(226, 52, 134, 28);
+		panel.add(tfAccNo);
+		tfAccNo.setColumns(13);
 		
-		tfRate = new JTextField();
-		tfRate.setBounds(329, 55, 61, 28);
-		add(tfRate);
+		tfCusNumber = new JFormattedTextField(createFormatter(NO_PATTERN));
+		tfCusNumber.setBounds(521, 87, 134, 28);
+		panel.add(tfCusNumber);
+		tfCusNumber.setColumns(13);
+		
+		tfRate = new JFormattedTextField(NumberFormat.getNumberInstance());
+		tfRate.setBounds(315, 243, 45, 28);
+		panel.add(tfRate);
 		tfRate.setColumns(10);
 		
-		tfBookedBalance = new JTextField();
-		tfBookedBalance.setBounds(133, 136, 134, 28);
-		add(tfBookedBalance);
+		tfBookedBalance = new JFormattedTextField(NumberFormat.getNumberInstance());
+		tfBookedBalance.setBounds(226, 166, 134, 28);
+		panel.add(tfBookedBalance);
 		tfBookedBalance.setColumns(10);
 		
 		JLabel lblRate = new JLabel("Rate");
-		lblRate.setBounds(280, 61, 39, 16);
-		add(lblRate);
+		lblRate.setBounds(263, 249, 39, 16);
+		panel.add(lblRate);
 		
 		JLabel lblOpeningDate = new JLabel("Opening Date");
-		lblOpeningDate.setBounds(6, 102, 91, 16);
-		add(lblOpeningDate);
+		lblOpeningDate.setBounds(99, 132, 117, 16);
+		panel.add(lblOpeningDate);
 		
-		JLabel lblClosedDate = new JLabel("Closed Date");
-		lblClosedDate.setBounds(303, 102, 91, 16);
-		add(lblClosedDate);
+		JLabel lblClosedDate = new JLabel("Maturity");
+		lblClosedDate.setBounds(396, 132, 115, 16);
+		panel.add(lblClosedDate);
 		
 		JLabel lblBookedBalance = new JLabel("Booked Balance");
-		lblBookedBalance.setBounds(6, 142, 103, 16);
-		add(lblBookedBalance);
+		lblBookedBalance.setBounds(99, 172, 117, 16);
+		panel.add(lblBookedBalance);
 		
 		chbAutoRenew = new JCheckBox("Auto Renew");
-		chbAutoRenew.setBounds(303, 179, 128, 23);
-		add(chbAutoRenew);
+		chbAutoRenew.setBounds(398, 209, 128, 23);
+		panel.add(chbAutoRenew);
 		
-		tfAutoTransfer = new JTextField();
-		tfAutoTransfer.setBounds(133, 176, 134, 28);
-		add(tfAutoTransfer);
-		tfAutoTransfer.setColumns(10);
+		tfAutoTransfer = new JFormattedTextField(NumberFormat.getIntegerInstance());
+		tfAutoTransfer.setBounds(226, 206, 134, 28);
+		panel.add(tfAutoTransfer);
+		tfAutoTransfer.setColumns(13);
 		
 		JLabel lblAutoTransfer = new JLabel("Transfer Account");
-		lblAutoTransfer.setBounds(6, 182, 115, 16);
-		add(lblAutoTransfer);
+		lblAutoTransfer.setBounds(99, 212, 115, 16);
+		panel.add(lblAutoTransfer);
 		
 		btnAdd = new JButton("Add");
-		btnAdd.setBounds(150, 232, 117, 29);
-		add(btnAdd);
+		btnAdd.setBounds(243, 297, 117, 29);
+		panel.add(btnAdd);
 		
 		btnClear = new JButton("Clear");
-		btnClear.setBounds(303, 232, 117, 29);
-		add(btnClear);
-		
-		btnAdd.addActionListener(this);
-		btnClear.addActionListener(this);
+		btnClear.setBounds(398, 297, 117, 29);
+		panel.add(btnClear);
 		
 		cbbAccountType = new JComboBox(AccountModel.model.values());
-		cbbAccountType.setBounds(133, 57, 83, 27);
-		add(cbbAccountType);
+		cbbAccountType.setBounds(521, 53, 58, 27);
+		panel.add(cbbAccountType);
 		
 		JLabel lblAccountType = new JLabel("Account Type");
-		lblAccountType.setBounds(6, 62, 88, 16);
-		add(lblAccountType);
+		lblAccountType.setBounds(396, 58, 119, 16);
+		panel.add(lblAccountType);
 		
 		dchOpeningDate = new JDateChooser();
+		dchOpeningDate.setBounds(226, 126, 134, 28);
+		panel.add(dchOpeningDate);
 		dchOpeningDate.getCalendarButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 			}
 		});
-		dchOpeningDate.setBounds(133, 96, 134, 28);
-		add(dchOpeningDate);
-		
-		dchClosedDate = new JDateChooser();
-		dchClosedDate.setBounds(406, 96, 134, 28);
-		add(dchClosedDate);
+		dchOpeningDate.setDate(Calendar.getInstance().getTime());
 		
 		JLabel lblOutstanding = new JLabel("Outstanding");
-		lblOutstanding.setBounds(303, 145, 61, 14);
-		add(lblOutstanding);
+		lblOutstanding.setBounds(396, 175, 115, 14);
+		panel.add(lblOutstanding);
 		
-		tfOutstanding = new JTextField();
-		tfOutstanding.setBounds(406, 136, 134, 28);
-		add(tfOutstanding);
+		tfOutstanding = new JFormattedTextField(NumberFormat.getNumberInstance());
+		tfOutstanding.setBounds(521, 166, 134, 28);
+		panel.add(tfOutstanding);
 		tfOutstanding.setColumns(10);
 		
 		lblTerm = new JLabel("Term");
-		lblTerm.setBounds(434, 61, 39, 14);
-		add(lblTerm);
+		lblTerm.setBounds(398, 250, 39, 14);
+		panel.add(lblTerm);
 		
-		tfTerm = new JTextField();
-		tfTerm.setBounds(479, 55, 61, 28);
-		add(tfTerm);
+		tfTerm = new JFormattedTextField(NumberFormat.getIntegerInstance());
+		tfTerm.setBounds(447, 243, 45, 28);
+		panel.add(tfTerm);
 		tfTerm.setColumns(10);
+		
+		JLabel lblCustomerName = new JLabel("Customer Name");
+		lblCustomerName.setBounds(99, 93, 117, 16);
+		panel.add(lblCustomerName);
+		
+		tfCusName = new JFormattedTextField();
+		tfCusName.setBounds(226, 87, 134, 28);
+		panel.add(tfCusName);
+		tfCusName.setColumns(10);
+		
+		dchMaturity = new JDateChooser();
+		dchMaturity.setBounds(521, 126, 134, 28);
+		panel.add(dchMaturity);
+		dchMaturity.setDate(Calendar.getInstance().getTime());
+		btnClear.addActionListener(this);
+		
+		btnAdd.addActionListener(this);
+
 	}
+	
+
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -165,47 +206,60 @@ public class AddAccountView extends JPanel implements ActionListener{
 			tfAccNo.setText("");
 			tfAutoTransfer.setText("");
 			tfBookedBalance.setText("");
-			tfCusName.setText("");
+			tfCusNumber.setText("");
 			tfRate.setText("");
 			dchOpeningDate.setDate(Calendar.getInstance().getTime());
 		}
 		
 	}
 	
+	protected MaskFormatter createFormatter(String s) {
+	    MaskFormatter formatter = null;
+	    try {
+	        formatter = new MaskFormatter(s);
+	    } catch (java.text.ParseException exc) {
+	        System.err.println("formatter is bad: " + exc.getMessage());
+	        System.exit(-1);
+	    }
+	    return formatter;
+	}
+	
 	private void doAddNewAccount(){
-		if (StringUtils.isEmpty(tfAccNo.getText()) || StringUtils.isEmpty(tfCusName.getText())){
+		
+		if (StringUtils.isEmpty(tfAccNo.getText()) || StringUtils.isEmpty(tfCusNumber.getText())){
 			showError("Account Number and Customer number are required!");
 			return;
 		}
-		AccountModel addModel = new AccountModel(tfAccNo.getText());
+		addModel = new AccountModel(tfAccNo.getText());
+		addModel.setCusNo(tfCusNumber.getText());
 		addModel.setCusName(tfCusName.getText());
 		
-		try {
-			addModel.setBookedBalance(Long.parseLong(tfBookedBalance.getText()));
-		} catch (Exception e) {
+		if (!StringUtils.isEmpty(tfBookedBalance.getText())){
+			addModel.setBookedBalance(((Number)tfBookedBalance.getValue()).longValue());
+		} else {
 			showError("Invalid Booked Balance value!");
 			return;
 		}
 		
-		try {
-			addModel.setBookedBalance(Long.parseLong(tfOutstanding.getText()));
-		} catch (Exception e) {
+		if (!StringUtils.isEmpty(tfOutstanding.getText())){
+			addModel.setOutstanding(((Number)tfOutstanding.getValue()).longValue());
+		} else {
 			showError("Invalid Outstading value!");
 			return;
 		}
 		
-		try {
-			addModel.setTerm(Integer.parseInt(tfTerm.getText()));
-		} catch (Exception e) {
+		if (!StringUtils.isEmpty(tfTerm.getText())) {
+			addModel.setTerm(((Number)tfTerm.getValue()).intValue());
+		} else {
 			showError("Invalid Outstading value!");
 			return;
 		}
 		
-		if (dchClosedDate.getDate() == null){
-			showError("Invalid Closed Date value!");
+		if (dchMaturity.getDate() == null){
+			showError("Invalid Maturity value!");
 			return;
 		} else {
-			addModel.setCloseDate(dchClosedDate.getDate().getTime());
+			addModel.setMaturity(dchMaturity.getDate().getTime());
 		}
 		
 		if (dchOpeningDate.getDate() == null){
@@ -224,17 +278,48 @@ public class AddAccountView extends JPanel implements ActionListener{
 //			addModel.setMaturity(dchMaturity.getDate().getTime());
 //		}
 		
-		try {
-			addModel.setRate(Float.parseFloat(tfRate.getText()));
-		} catch (Exception e) {
+		if (!StringUtils.isEmpty(tfRate.getText())) {
+			addModel.setRate(((Number)tfRate.getValue()).floatValue());
+		} else {
 			showError("Invalid Opening Date value!");
 			return;
 		}
+		addModel.setAutoRenew(chbAutoRenew.isSelected()); 
+		addModel.setAutoTransfer(tfAutoTransfer.getText());
 		
 		addModel.setAccType(AccountModel.model.values()[cbbAccountType.getSelectedIndex()].toString());
-		
 		DBService.getInstance().addNewAccount(addModel);
 		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				prepareOutput();
+				
+			}
+		}).start();
+		
+		
+	}
+	
+	private void prepareOutput(){
+		try {
+			Rtf.template( new FileInputStream("sample.rtf") )
+				.inject( "CusNo", addModel.getCusNo() )
+				.inject( "CusName", addModel.getCusName() )
+				.inject( "AccNo", addModel.getAccNo() )
+				.inject( "Bal", tfBookedBalance.getText() + addModel.getAccType())
+				.inject( "Ter", addModel.getTerm() )
+				.inject( "Rat", addModel.getRate() )
+				.inject( "TrsAcc", addModel.getAutoTransfer() )
+				.inject( "D", Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
+				.inject( "M", Calendar.getInstance().get(Calendar.MONTH)+1 )
+				.inject( "Y", Calendar.getInstance().get(Calendar.YEAR) )
+				.out( new FileOutputStream("out.rtf") );
+			Desktop.getDesktop().open(new File("G:\\ScheduledAccountForm\\out.rtf"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void showError(String message){

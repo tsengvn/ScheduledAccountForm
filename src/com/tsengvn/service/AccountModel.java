@@ -8,17 +8,17 @@ import javax.swing.ComboBoxModel;
  */
 public class AccountModel {
 	private String accNo;
-//	private String cusNo;
+	private String cusNo;
 	private String cusName;
 	private String accType;
 	private float rate;
 	private long openDate;
 	private long bookedBalance;
 	private long closeDate;
-//	private long maturity;
+	private long maturity;
 	private boolean autoRenew;
 	private String autoTransfer;
-	private float outstanding;
+	private long outstanding;
 	private int term;
 	
 	public static enum model {
@@ -98,11 +98,11 @@ public class AccountModel {
 		this.accType = accType;
 	}
 
-	public float getOutstanding() {
+	public long getOutstanding() {
 		return outstanding;
 	}
 
-	public void setOutstanding(float outstanding) {
+	public void setOutstanding(long outstanding) {
 		this.outstanding = outstanding;
 	}
 
@@ -112,6 +112,22 @@ public class AccountModel {
 
 	public void setTerm(int term) {
 		this.term = term;
+	}
+
+	public String getCusNo() {
+		return cusNo;
+	}
+
+	public void setCusNo(String cusNo) {
+		this.cusNo = cusNo;
+	}
+
+	public long getMaturity() {
+		return maturity;
+	}
+
+	public void setMaturity(long maturity) {
+		this.maturity = maturity;
 	}
 	
 	
