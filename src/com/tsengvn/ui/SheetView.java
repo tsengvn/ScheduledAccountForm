@@ -29,6 +29,7 @@ import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
 
 import org.apache.commons.lang3.StringUtils;
+import com.toedter.calendar.JDateChooser;
 
 /**
  * Creator: Hien Ngo
@@ -44,9 +45,13 @@ public class SheetView extends JPanel {
 	private JTextField tfSelectorAccNo;
 	private JLabel lblOutstandingTotal;
 	private JButton btnNewButton;
-	private JPanel panel_2;
 	private JLabel lblType;
 	private JComboBox accType;
+	private JLabel lblAmount;
+	private JComboBox comboBox;
+	private JLabel lblTime;
+	private JDateChooser dateChooser;
+	private JDateChooser dateChooser_1;
 
 	/**
 	 * Create the panel.
@@ -55,11 +60,12 @@ public class SheetView extends JPanel {
 		setLayout(new BorderLayout(0, 0));
 		JPanel panel = new JPanel();
 		add(panel, BorderLayout.NORTH);
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		FlowLayout fl_panel = new FlowLayout(FlowLayout.LEADING, 5, 5);
+		panel.setLayout(fl_panel);
 		
 		JPanel selectorPanel = new JPanel();
 		panel.add(selectorPanel);
-		selectorPanel.setLayout(new GridLayout(0, 2, 10, 10));
+		selectorPanel.setLayout(new GridLayout(2, 2, 10, 10));
 		
 		JLabel lblCustomerName = new JLabel("Account Number");
 		lblCustomerName.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -77,14 +83,7 @@ public class SheetView extends JPanel {
 		selectorPanel.add(tfSelectorCusNo);
 		tfSelectorCusNo.setColumns(10);
 		
-		btnNewButton = new JButton("Search");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				refeshData();
-			}
-		});
-		
-		panel_2 = new JPanel();
+		JPanel panel_2 = new JPanel();
 		panel.add(panel_2);
 		panel_2.setLayout(new GridLayout(2, 2, 10, 10));
 		
@@ -102,7 +101,35 @@ public class SheetView extends JPanel {
 		cbReportKind = new JComboBox();
 		panel_2.add(cbReportKind);
 		cbReportKind.setModel(new DefaultComboBoxModel(new String[] {"", "Closed today", "Opened today", "Maturity today"}));
-		panel.add(btnNewButton);
+		
+		JPanel panel_3 = new JPanel();
+		panel.add(panel_3);
+		panel_3.setLayout(new GridLayout(0, 3, 10, 10));
+		
+		lblTime = new JLabel("Time");
+		lblTime.setHorizontalAlignment(SwingConstants.RIGHT);
+		panel_3.add(lblTime);
+		
+		dateChooser_1 = new JDateChooser();
+		panel_3.add(dateChooser_1);
+		
+		dateChooser = new JDateChooser();
+		panel_3.add(dateChooser);
+		
+		lblAmount = new JLabel("Amount");
+		lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
+		panel_3.add(lblAmount);
+		
+		comboBox = new JComboBox(new Object[]{});
+		panel_3.add(comboBox);
+		
+		btnNewButton = new JButton("Search");
+		panel_3.add(btnNewButton);
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				refeshData();
+			}
+		});
 		
 		
 		tableModel = new MyTableModel();

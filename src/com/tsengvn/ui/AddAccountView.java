@@ -11,8 +11,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -30,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.tsengvn.service.AccountModel;
 import com.tsengvn.service.DBService;
+import com.tsengvn.util.CommonUtils;
+import com.tsengvn.util.IntegerTextField;
 import com.tutego.jrtf.Rtf;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.JFormattedTextField;
@@ -40,11 +44,11 @@ import java.awt.BorderLayout;
  * Date: Nov 20, 2012
  */
 public class AddAccountView extends JPanel implements ActionListener{
-	private JFormattedTextField tfAccNo;
-	private JFormattedTextField tfCusNumber;
+	private IntegerTextField tfAccNo;
+	private IntegerTextField tfCusNumber;
 	private JFormattedTextField tfRate;
 	private JFormattedTextField tfBookedBalance;
-	private JFormattedTextField tfAutoTransfer;
+	private IntegerTextField tfAutoTransfer;
 	private JButton btnAdd;
 	private JButton btnClear;
 	private JCheckBox chbAutoRenew;
@@ -85,12 +89,12 @@ public class AddAccountView extends JPanel implements ActionListener{
 		lblCustomerNo.setBounds(398, 93, 113, 16);
 		panel.add(lblCustomerNo);
 		
-		tfAccNo = new JFormattedTextField(createFormatter(NO_PATTERN));
+		tfAccNo = new IntegerTextField();
 		tfAccNo.setBounds(226, 52, 134, 28);
 		panel.add(tfAccNo);
 		tfAccNo.setColumns(13);
 		
-		tfCusNumber = new JFormattedTextField(createFormatter(NO_PATTERN));
+		tfCusNumber = new IntegerTextField();
 		tfCusNumber.setBounds(521, 87, 134, 28);
 		panel.add(tfCusNumber);
 		tfCusNumber.setColumns(13);
@@ -125,7 +129,7 @@ public class AddAccountView extends JPanel implements ActionListener{
 		chbAutoRenew.setBounds(398, 209, 128, 23);
 		panel.add(chbAutoRenew);
 		
-		tfAutoTransfer = new JFormattedTextField(NumberFormat.getIntegerInstance());
+		tfAutoTransfer = new IntegerTextField();
 		tfAutoTransfer.setBounds(226, 206, 134, 28);
 		panel.add(tfAutoTransfer);
 		tfAutoTransfer.setColumns(13);
@@ -149,15 +153,6 @@ public class AddAccountView extends JPanel implements ActionListener{
 		JLabel lblAccountType = new JLabel("Account Type");
 		lblAccountType.setBounds(396, 58, 119, 16);
 		panel.add(lblAccountType);
-		
-		dchOpeningDate = new JDateChooser();
-		dchOpeningDate.setBounds(226, 126, 134, 28);
-		panel.add(dchOpeningDate);
-		dchOpeningDate.getCalendarButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
-		dchOpeningDate.setDate(Calendar.getInstance().getTime());
 		
 		JLabel lblOutstanding = new JLabel("Outstanding");
 		lblOutstanding.setBounds(396, 175, 115, 14);
@@ -186,12 +181,37 @@ public class AddAccountView extends JPanel implements ActionListener{
 		panel.add(tfCusName);
 		tfCusName.setColumns(10);
 		
+		dchOpeningDate = new JDateChooser();
+		dchOpeningDate.setBounds(226, 126, 134, 28);
+		panel.add(dchOpeningDate);
+		
+		
 		dchMaturity = new JDateChooser();
 		dchMaturity.setBounds(521, 126, 134, 28);
 		panel.add(dchMaturity);
-		dchMaturity.setDate(Calendar.getInstance().getTime());
-		btnClear.addActionListener(this);
 		
+		dchOpeningDate.getDateEditor().addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent e) {
+				if ("date".equals(e.getPropertyName())){
+					Date newDate = (Date) e.getNewValue();
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(newDate);
+					if (cal.getActualMaximum(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)){
+						cal.add(Calendar.MONTH, 1);
+						cal.add(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH) - cal.get(Calendar.DAY_OF_MONTH));
+					} else {
+						cal.add(Calendar.MONTH, 1);
+					}
+										
+					dchMaturity.setDate(cal.getTime());
+					
+				}
+			}
+		});
+		dchOpeningDate.setDate(Calendar.getInstance().getTime());
+		
+		btnClear.addActionListener(this);
 		btnAdd.addActionListener(this);
 
 	}
@@ -290,21 +310,32 @@ public class AddAccountView extends JPanel implements ActionListener{
 		addModel.setAccType(AccountModel.model.values()[cbbAccountType.getSelectedIndex()].toString());
 		DBService.getInstance().addNewAccount(addModel);
 		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				prepareOutput();
-				
-			}
-		}).start();
-		
+
+		prepareOutput();
+	
 		
 	}
 	
 	private void prepareOutput(){
 		try {
-			Rtf.template( new FileInputStream("sample.rtf") )
+//			String outName = "output/" + addModel.getAccNo() + "_" + addModel.getCusNo() + ".rtf";
+			final JFileChooser fc = new JFileChooser();
+			fc.setDialogType(JFileChooser.SAVE_DIALOG);
+			
+			fc.setDialogTitle("Specify a file to save");
+			fc.setSelectedFile(new File(addModel.getAccNo() + "_" + addModel.getCusNo() + ".rtf"));
+			
+//			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//			fc.setAcceptAllFileFilterUsed(false);
+			if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+//				String outFile = fc.getCurrentDirectory() + addModel.getCusName() + "_" + addModel.getAccNo() + ".rtf";
+				
+				File outFile = fc.getSelectedFile();
+				if(!outFile.getPath().toLowerCase().endsWith(".rtf")){
+					outFile = new File(outFile.getPath() + ".rtf");
+				}
+				
+				Rtf.template( new FileInputStream("sample.rtf") )
 				.inject( "CusNo", addModel.getCusNo() )
 				.inject( "CusName", addModel.getCusName() )
 				.inject( "AccNo", addModel.getAccNo() )
@@ -315,8 +346,12 @@ public class AddAccountView extends JPanel implements ActionListener{
 				.inject( "D", Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
 				.inject( "M", Calendar.getInstance().get(Calendar.MONTH)+1 )
 				.inject( "Y", Calendar.getInstance().get(Calendar.YEAR) )
-				.out( new FileOutputStream("out.rtf") );
-			Desktop.getDesktop().open(new File("G:\\ScheduledAccountForm\\out.rtf"));
+				.inject( "MoW", CommonUtils.moneyToWord(addModel.getBookedBalance()+"") + addModel.getAccType())
+
+				.out( new FileOutputStream(outFile) );
+				Desktop.getDesktop().open(outFile);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
