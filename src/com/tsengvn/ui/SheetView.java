@@ -13,6 +13,7 @@ import javax.swing.JComboBox;
 import com.tsengvn.service.AccountModel;
 import com.tsengvn.service.DBService;
 import com.tsengvn.ui.MyTableModel.OnTableDataChanged;
+import com.tsengvn.util.IntegerTextField;
 
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
@@ -27,6 +28,7 @@ import java.awt.GridLayout;
 import javax.swing.SwingConstants;
 import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.UIManager;
 
 import org.apache.commons.lang3.StringUtils;
 import com.toedter.calendar.JDateChooser;
@@ -48,10 +50,10 @@ public class SheetView extends JPanel {
 	private JLabel lblType;
 	private JComboBox accType;
 	private JLabel lblAmount;
-	private JComboBox comboBox;
 	private JLabel lblTime;
 	private JDateChooser dateChooser;
 	private JDateChooser dateChooser_1;
+	private JTextField tfAmount;
 
 	/**
 	 * Create the panel.
@@ -120,8 +122,9 @@ public class SheetView extends JPanel {
 		lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 		panel_3.add(lblAmount);
 		
-		comboBox = new JComboBox(new Object[]{});
-		panel_3.add(comboBox);
+		tfAmount = new IntegerTextField();
+		tfAmount.setColumns(10);
+		panel_3.add(tfAmount);
 		
 		btnNewButton = new JButton("Search");
 		panel_3.add(btnNewButton);
@@ -189,6 +192,11 @@ public class SheetView extends JPanel {
 		if (!StringUtils.isEmpty(tfSelectorAccNo.getText())){
 			condition += (StringUtils.isEmpty(condition))? "" : " and ";
 			condition += DBService.ACCOUNT_NO + "='" + tfSelectorAccNo.getText() +"'";
+		}
+		
+		if (!StringUtils.isEmpty(tfAmount.getText())){
+			condition += (StringUtils.isEmpty(condition))? "" : " and ";
+			condition += DBService.BOOKED_BALANCE + ">=" + tfAmount.getText();
 		}
 
 		condition += (StringUtils.isEmpty(condition))? "" : " and ";

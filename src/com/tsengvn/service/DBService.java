@@ -160,6 +160,7 @@ public class DBService {
 			query += " where " + condition;
 		} 
 		
+		query += " order by " + OPENING_DATE;
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		try {
 			openConnection();

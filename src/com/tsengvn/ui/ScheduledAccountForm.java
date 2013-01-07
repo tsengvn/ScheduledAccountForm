@@ -46,6 +46,12 @@ public class ScheduledAccountForm {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
