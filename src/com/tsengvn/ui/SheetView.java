@@ -1,37 +1,34 @@
 package com.tsengvn.ui;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Vector;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
-import javax.swing.JTable;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.toedter.calendar.JDateChooser;
 import com.tsengvn.service.AccountModel;
 import com.tsengvn.service.DBService;
 import com.tsengvn.ui.MyTableModel.OnTableDataChanged;
 import com.tsengvn.util.IntegerTextField;
-
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-
-import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.GridLayout;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.UIManager;
-
-import org.apache.commons.lang3.StringUtils;
-import com.toedter.calendar.JDateChooser;
 
 /**
  * Creator: Hien Ngo
@@ -51,8 +48,8 @@ public class SheetView extends JPanel {
 	private JComboBox accType;
 	private JLabel lblAmount;
 	private JLabel lblTime;
-	private JDateChooser dateChooser;
-	private JDateChooser dateChooser_1;
+	private JDateChooser dcTo;
+	private JDateChooser dcFrom;
 	private JTextField tfAmount;
 
 	/**
@@ -102,32 +99,37 @@ public class SheetView extends JPanel {
 		
 		cbReportKind = new JComboBox();
 		panel_2.add(cbReportKind);
-		cbReportKind.setModel(new DefaultComboBoxModel(new String[] {"", "Closed today", "Opened today", "Maturity today"}));
+		cbReportKind.setModel(new DefaultComboBoxModel(new String[] {"", "Closed", "Opened", "Maturity"}));
+		cbReportKind.addActionListener(mActionListener);
 		
 		JPanel panel_3 = new JPanel();
 		panel.add(panel_3);
 		panel_3.setLayout(new GridLayout(0, 3, 10, 10));
 		
-		lblTime = new JLabel("Time");
+		lblTime = new JLabel("Duration");
 		lblTime.setHorizontalAlignment(SwingConstants.RIGHT);
 		panel_3.add(lblTime);
 		
-		dateChooser_1 = new JDateChooser();
-		panel_3.add(dateChooser_1);
+		dcFrom = new JDateChooser();
+		panel_3.add(dcFrom);
+		dcFrom.setToolTipText("From date");
+		dcFrom.getDateEditor().addPropertyChangeListener(mOnFromDateChangeListener);
 		
-		dateChooser = new JDateChooser();
-		panel_3.add(dateChooser);
+		dcTo = new JDateChooser();
+		panel_3.add(dcTo);
+		dcTo.setToolTipText("To Date");
+		dcTo.getDateEditor().addPropertyChangeListener(mOnToDateChangeListener);
 		
 		lblAmount = new JLabel("Amount");
 		lblAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 		panel_3.add(lblAmount);
 		
 		tfAmount = new IntegerTextField();
-		tfAmount.setColumns(10);
 		panel_3.add(tfAmount);
+		tfAmount.setColumns(10);
 		
 		btnNewButton = new JButton("Search");
-		panel_3.add(btnNewButton);
+		panel.add(btnNewButton);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				refeshData();
@@ -164,23 +166,82 @@ public class SheetView extends JPanel {
 		
 	}
 	
+	private ActionListener mActionListener =  new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			if (arg0.getSource() == cbReportKind){
+				if (cbReportKind.getSelectedIndex() != 0 && dcFrom.getDate() == null && dcTo.getDate() == null){
+					dcFrom.setDate(Calendar.getInstance().getTime());
+					dcTo.setDate(Calendar.getInstance().getTime());
+				}
+				
+				if (cbReportKind.getSelectedIndex() == 0){
+					dcFrom.setCalendar(null);
+					dcTo.setCalendar(null);
+				}
+			}
+		}
+	};
+	
+	private PropertyChangeListener mOnFromDateChangeListener = new PropertyChangeListener() {
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent e) {
+			if (e.getNewValue() == null)
+				return;
+			
+			if ("date".equals(e.getPropertyName())){
+				Date newDate = (Date) e.getNewValue();
+				
+				if (dcTo.getDate() == null){
+					dcTo.setDate(newDate);
+				}
+				
+				if (newDate.getTime() > dcTo.getDate().getTime()){
+					dcFrom.setDate((Date) e.getOldValue());
+				}
+			}	
+		}
+	};
+	
+	private PropertyChangeListener mOnToDateChangeListener = new PropertyChangeListener() {
+		@Override
+		public void propertyChange(PropertyChangeEvent e) {
+			if (e.getNewValue() == null)
+				return;
+			
+			if ("date".equals(e.getPropertyName()) && dcFrom.getDate() == null){
+				Date newDate = (Date) e.getNewValue();
+				dcFrom.setDate(newDate);
+				
+				if (newDate.getTime() < dcFrom.getDate().getTime()){
+					dcTo.setDate((Date) e.getOldValue());
+				}
+			}
+		}
+	};
+	
 	private void refeshData(){
 		String condition = "";
-
-		switch (cbReportKind.getSelectedIndex()) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DD");
+		
+		if (cbReportKind.getSelectedIndex() > 0){
+			String temp = " %s >= '%s' and %s <= '%s' ";
+			switch (cbReportKind.getSelectedIndex()) {
 			case 1:
-				condition += DBService.CLOSED_DATE + "= curDate()";
+				condition += String.format(temp, DBService.CLOSED_DATE, dateFormat.format(dcFrom.getDate()), DBService.CLOSED_DATE, dateFormat.format(dcTo.getDate()));
 				break;
 			case 2:
-				condition += DBService.OPENING_DATE + "= curDate()";
+				condition += String.format(temp, DBService.OPENING_DATE, dateFormat.format(dcFrom.getDate()), DBService.OPENING_DATE, dateFormat.format(dcTo.getDate()));
 				break;
 			case 3:
-				condition += DBService.MATURITY + "= curDate()";
+				condition += String.format(temp, DBService.MATURITY, dateFormat.format(dcFrom.getDate()), DBService.MATURITY, dateFormat.format(dcTo.getDate()));
 				break;
-			case 0:
-			default:
-				break;
+			}
+			System.out.println(condition);
 		}
+		
 		
 		
 		
@@ -214,7 +275,6 @@ public class SheetView extends JPanel {
 		});
 		table.setModel(tableModel);
 		table.revalidate();
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		NumberFormat f = NumberFormat.getInstance();
 
 		lblOutstandingTotal.setText(f.format(tableModel.getSumOfOutstanding()));

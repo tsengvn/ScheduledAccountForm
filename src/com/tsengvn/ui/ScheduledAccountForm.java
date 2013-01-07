@@ -20,6 +20,8 @@ import com.jgoodies.looks.FontSet;
 import com.jgoodies.looks.FontSets;
 import com.jgoodies.looks.plastic.PlasticLookAndFeel;
 import com.tsengvn.service.DBService;
+
+import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -29,6 +31,11 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.JTabbedPane;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
 
 /**
  * Creator: Hien Ngo
@@ -79,6 +86,7 @@ public class ScheduledAccountForm {
 		DBService.getInstance().init();
 		
 		mFrame = new JFrame();
+		mFrame.setTitle("Deposit Account Management");
 		mFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mFrame.setBounds(100, 100, 893, 575);
 		
@@ -89,12 +97,25 @@ public class ScheduledAccountForm {
 		mMenuBar.add(mnFile);
 		
 		JMenuItem mntmExit = new JMenuItem("Exit");
+		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
+		mntmExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
 		mnFile.add(mntmExit);
 		
 		JMenu mnHelp = new JMenu("Help");
 		mMenuBar.add(mnHelp);
 		
 		JMenuItem mntmAbout = new JMenuItem("About");
+		mntmAbout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				AboutDialog dialog = new AboutDialog();
+				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				dialog.setVisible(true);
+			}
+		});
 		mnHelp.add(mntmAbout);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -105,18 +126,7 @@ public class ScheduledAccountForm {
 		
 		addView = new AddAccountView();
 		tabbedPane.addTab("Add new", null, addView, null);
-		tabbedPane.addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				JTabbedPane sourceTabbedPane = (JTabbedPane) arg0.getSource();
-		        if (sourceTabbedPane.getSelectedIndex() == 0){
-		        	
-		        }
-				
-			}
-		});
-
+		
 	}
 	
 	public void setMainView(JPanel aPanel){

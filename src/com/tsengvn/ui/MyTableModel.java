@@ -101,8 +101,9 @@ public class MyTableModel extends AbstractTableModel{
 		 }
 	 }
 	 
-	 public float getSumOfOutstanding(){
-		 float sum = 0;
+	 public BigDecimal getSumOfOutstanding(){
+//		 BigDecimal sum = new BigDecimal(0);
+		 BigDecimal a = new BigDecimal(0);
 //		 int outstandingIndex = 0;
 //		 for (int i=0 ; i<mColumnNames.length ; i++){
 //			 if (mColumnNames[i].equals(DBService.OUTSTANDING)){
@@ -112,9 +113,15 @@ public class MyTableModel extends AbstractTableModel{
 //		 }
 		 
 		 for (int i=0 ; i<getRowCount() ; i++){
-			 sum += (Float) getValueAt(i, 11);
+			 float value = (Float)getValueAt(i, 11);
+			 
+			 if (value != 0){
+				 BigDecimal b = new BigDecimal(value);
+				 a = a.add(b);
+			 }
 		 }
-		 return sum;
+		 
+		 return a;
 	 }
 	
 	 public OnTableDataChanged getListener() {
