@@ -36,6 +36,14 @@ import java.awt.event.ActionEvent;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
+import java.io.File;
+import java.io.IOException;
+
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 /**
  * Creator: Hien Ngo
@@ -103,6 +111,14 @@ public class ScheduledAccountForm {
 				System.exit(0);
 			}
 		});
+		
+		JMenuItem mntmExport = new JMenuItem("Export...");
+		mntmExport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				((SheetView)sheetView).doExport();
+			}
+		});
+		mnFile.add(mntmExport);
 		mnFile.add(mntmExit);
 		
 		JMenu mnHelp = new JMenu("Help");

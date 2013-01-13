@@ -207,6 +207,26 @@ public class DBService {
 		return result;
 	}
 	
+	public String getCustomerName(String cusId){
+		ArrayList<String> result = new ArrayList<String>();
+		try {
+			openConnection();
+			String query = "select " + CUSTOMER_NAME + " from " + ACCOUNT_TABLE + " where " + CUSTOMER_NO + "=?";
+			PreparedStatement ps = mCon.prepareStatement(query);
+			ps.setString(1, cusId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()){
+				result.add(rs.getString(1));
+			}
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		closeConnetion();
+		return (result.isEmpty())? null : result.get(0);
+	}
+	
+	
 	public int updateClosed(boolean closed, String accNo){
 		int result = 0;
 		try {

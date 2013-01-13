@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -15,12 +16,26 @@ import java.util.Date;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import jxl.CellView;
+import jxl.DateCell;
+import jxl.Workbook;
+import jxl.format.CellFormat;
+import jxl.write.DateFormat;
+import jxl.write.DateTime;
+import jxl.write.Label;
+import jxl.write.Number;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableFont;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -280,4 +295,111 @@ public class SheetView extends JPanel {
 		lblOutstandingTotal.setText(f.format(tableModel.getSumOfOutstanding()));
 	}
 		
+	
+	public void doExport(){
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogType(JFileChooser.SAVE_DIALOG);
+		fc.setDialogTitle("Specify a file to save");
+		fc.setSelectedFile(new File("mySheet.xls"));
+		
+		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+			File outFile = fc.getSelectedFile();
+			if(!outFile.getPath().toLowerCase().endsWith(".xls")){
+				outFile = new File(outFile.getPath() + ".xls");
+			}
+			export(outFile);
+			
+		}
+		
+	}
+	
+	private void export(File outFile){
+		try {
+			WritableWorkbook  workbook = Workbook.createWorkbook(outFile);
+			
+			WritableFont times16fontBold = new WritableFont(WritableFont.TIMES, 12, WritableFont.BOLD); 
+			WritableCellFormat times16formatBold = new WritableCellFormat (times16fontBold);
+			
+			WritableFont times16font = new WritableFont(WritableFont.TIMES, 12); 
+			WritableCellFormat times16format = new WritableCellFormat (times16font);
+			
+			WritableSheet sheet = workbook.createSheet("First Sheet", 0);
+			int row = 0;
+			//
+			Label label = new Label(0, row, "VIETNAM BANK FOR AGRICULTURE &RURAL DEVELOPMENT", times16formatBold);
+			sheet.addCell(label);
+			
+			//***********
+			row++;
+			label = new Label(0, row, "SONG THAN INDUSTRIAL ZONE BRANCH", times16formatBold); 
+			sheet.addCell(label);
+			
+			//***********
+			row+=2;
+			String title = "TIME DEPOSIT ACCOUNT LIST REPORT";
+			if (!StringUtils.isEmpty(tfSelectorCusNo.getText())){
+				String name = DBService.getInstance().getCustomerName(tfSelectorCusNo.getText());
+				if (name != null){
+					title += " OF " + name;
+				}
+			}
+			label = new Label(0, row, title, times16formatBold); 
+			sheet.addCell(label);
+			
+			//***********
+			row++;
+			label = new Label(0, row, "Account Type : " + accType.getSelectedItem()); 
+			sheet.addCell(label);
+			
+			
+			//***********
+			row++;
+			for (int i=0 ; i<tableModel.getColumnCount() ; i++){
+				CellView cv = new CellView();
+				
+				if (i==0){
+					cv.setSize(30);
+				} else {
+					cv.setAutosize(true);	
+				} 
+				
+				sheet.setColumnView(i, cv);
+				label = new Label(i, row, tableModel.getColumnName(i), times16formatBold); 
+				sheet.addCell(label);
+			}
+			
+			//***********
+			row++;
+			for (int i=0 ; i<tableModel.getRowCount() ; i++){
+				for (int j=0 ; j<tableModel.getColumnCount() ; j++){
+					if (tableModel.getColumnClass(j) == String.class ||  tableModel.getColumnClass(j) == Boolean.class ){
+						label = new Label(j, i+row,  tableModel.getValueAt(i, j)+"");
+						sheet.addCell(label);
+					} else if (tableModel.getColumnClass(j) == java.sql.Date.class){
+						
+						java.sql.Date date = (java.sql.Date) tableModel.getValueAt(i, j);
+						if (date != null){
+							SimpleDateFormat format = new SimpleDateFormat("MMM/dd/YYYY");
+							label = new Label(j, i+row, format.format(date));
+							sheet.addCell(label);
+						}
+						
+					} else {
+						
+						Number number = new Number(j, i+row, Double.parseDouble(tableModel.getValueAt(i, j) +""));
+//						label = new Label(j, i+row, tableModel.getValueAt(i, j) + ""); 
+						sheet.addCell(number);
+					}
+					
+				}
+			}
+			
+			workbook.write(); 
+			workbook.close();
+			
+			System.out.println("Export done");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
